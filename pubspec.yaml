@@ -1,0 +1,43 @@
+name: gci_mobile
+description: "GCI native mobile app — a Flutter frontend for the gcibmn collective-intelligence API."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Networking
+  dio: ^5.7.0
+  flutter_client_sse: ^2.0.2
+
+  # Navigation + deep links (go_router consumes platform deep links natively)
+  go_router: ^14.6.2
+
+  # Storage
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.3
+
+  # UI
+  fl_chart: ^0.69.2
+  cupertino_icons: ^1.0.8
+
+  # Utilities
+  share_plus: ^10.1.2
+  uuid: ^4.5.1
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
