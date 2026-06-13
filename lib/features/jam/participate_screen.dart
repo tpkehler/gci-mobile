@@ -174,8 +174,6 @@ class _ParticipateScreenState extends ConsumerState<ParticipateScreen> {
                             jamId: widget.jamId,
                             prompt: prompt,
                             reasoningPrompt: data.pairedReasoningFor(prompt),
-                            alreadyResponded: data.status.respondedOrders
-                                .contains(prompt.orderIndex),
                             alreadyReviewed: data.status.reviewedOrders
                                 .contains(prompt.orderIndex),
                             onCompleted: () =>
@@ -244,14 +242,12 @@ class PromptFlow extends ConsumerStatefulWidget {
     required this.prompt,
     required this.onCompleted,
     this.reasoningPrompt,
-    this.alreadyResponded = false,
     this.alreadyReviewed = false,
   });
 
   final String jamId;
   final JamPrompt prompt;
   final JamPrompt? reasoningPrompt;
-  final bool alreadyResponded;
   final bool alreadyReviewed;
   final VoidCallback onCompleted;
 
@@ -260,7 +256,12 @@ class PromptFlow extends ConsumerStatefulWidget {
 }
 
 class _PromptFlowState extends ConsumerState<PromptFlow> {
-  late bool _responded = widget.alreadyResponded;
+  // Always begin at the predict → reason step. This mirrors the web PromptTab,
+  // which opens in 'predict' mode for every prompt regardless of whether the
+  // user has responded before. Collective reasoning is ALWAYS predict (quant)
+  // → reason (qual) → peer review; prior-response state drives the stepper's
+  // progress indicators, never a skip past the prediction.
+  bool _responded = false;
   String? _submittedReasoning;
   double? _submittedProbability;
 
