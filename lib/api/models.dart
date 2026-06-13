@@ -280,6 +280,92 @@ class PeerIdea {
       );
 }
 
+/// An idea in the warm-up discussion (IdeaJam), from
+/// `GET /api/jams/{id}/propositions`. This is a proposition surfaced as a
+/// Slack-like discussion item that can be queried, built-on, or flagged.
+class Idea {
+  const Idea({
+    required this.id,
+    required this.text,
+    required this.contributorName,
+    required this.participantType,
+    this.contributorId,
+    this.contributorReason,
+    this.contributorRating,
+    this.promptOrder,
+    this.createdAt,
+  });
+
+  final String id;
+  final String text;
+  final String contributorName;
+
+  /// 'human' | 'ai_agent'
+  final String participantType;
+  final String? contributorId;
+  final String? contributorReason;
+  final int? contributorRating;
+  final int? promptOrder;
+  final String? createdAt;
+
+  bool get isAi => participantType == 'ai_agent';
+
+  factory Idea.fromJson(Map<String, dynamic> json) => Idea(
+        id: (json['proposition_id'] ?? json['id'] ?? '') as String,
+        text: json['text'] as String? ?? '',
+        contributorName: json['contributor_name'] as String? ?? 'Unknown',
+        participantType: json['participant_type'] as String? ?? 'human',
+        contributorId: json['contributor_id'] as String?,
+        contributorReason: json['contributor_reason'] as String?,
+        contributorRating: json['contributor_rating'] == null
+            ? null
+            : _toInt(json['contributor_rating']),
+        promptOrder:
+            json['prompt_order'] == null ? null : _toInt(json['prompt_order']),
+        createdAt: json['created_at'] as String?,
+      );
+}
+
+/// A reply/question on an idea, from
+/// `GET /api/propositions/{id}/replies`. When the idea's author is an AI agent,
+/// `agentResponse` carries the answer.
+class IdeaReply {
+  const IdeaReply({
+    required this.id,
+    required this.promptText,
+    required this.questionerName,
+    required this.questionerType,
+    required this.status,
+    this.agentResponse,
+    this.responseTimestamp,
+    this.createdAt,
+  });
+
+  final String id;
+  final String promptText;
+  final String questionerName;
+
+  /// 'human' | 'ai_agent'
+  final String questionerType;
+  final String status;
+  final String? agentResponse;
+  final String? responseTimestamp;
+  final String? createdAt;
+
+  bool get hasAnswer => (agentResponse ?? '').isNotEmpty;
+
+  factory IdeaReply.fromJson(Map<String, dynamic> json) => IdeaReply(
+        id: (json['id'] ?? '') as String,
+        promptText: json['prompt_text'] as String? ?? '',
+        questionerName: json['questioner_name'] as String? ?? 'Unknown',
+        questionerType: json['questioner_type'] as String? ?? 'human',
+        status: json['status'] as String? ?? 'pending',
+        agentResponse: json['agent_response'] as String?,
+        responseTimestamp: json['response_timestamp'] as String?,
+        createdAt: json['created_at'] as String?,
+      );
+}
+
 /// Sentiment for a peer review, matching the web payloads.
 enum ReviewSentiment {
   agree,
@@ -361,17 +447,4 @@ class AuthResult {
   final String? email;
   final String? jwtToken;
   final String? error;
-}
-
-/// Live update event from the SSE channel `GET /api/jams/{id}/events`.
-class JamUpdateEvent {
-  const JamUpdateEvent({required this.propositions, required this.reviews});
-
-  final int propositions;
-  final int reviews;
-
-  factory JamUpdateEvent.fromJson(Map<String, dynamic> json) => JamUpdateEvent(
-        propositions: _toInt(json['propositions']),
-        reviews: _toInt(json['reviews']),
-      );
 }

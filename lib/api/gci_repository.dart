@@ -1,10 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter_client_sse/constants/sse_request_type_enum.dart';
-import 'package:flutter_client_sse/flutter_client_sse.dart';
-
-import '../core/config.dart';
 import 'api_client.dart';
 import 'models.dart';
 
@@ -186,31 +179,59 @@ class GciRepository {
   }) async {
     final resp = await _client.dio.post('/api/beta-sampling/generate', data: {
       'jam_id': jamId,
+      'template_id': jamId,
       'reviewer_id': reviewerId,
       'prompt_text': promptText,
       'user_reasoning': userReasoning ?? '',
       'probability_estimate': probabilityEstimate ?? 0.5,
+      // Pure exploration. This keeps the backend on its robust weighted-random
+      // selection path (matching the web client). Omitting it defaults to 0.5
+      // server-side, which routes into the exploitation branch and returns an
+      // empty set whenever relevance scoring is unavailable — the app then
+      // mistakes that for "no peers yet" and waits forever.
+      'lambda_value': 0.0,
       'sample_size': sampleSize,
       'mode': 'exploration',
     });
+
+    // Non-2xx: a genuinely empty proposition pool means "wait for peers";
+    // anything else is a real error the reviewer should see.
     if (resp.statusCode != 200) {
-      final detail = _detailOf(resp.data)?.toLowerCase() ?? '';
-      if (detail.contains('no propositions') ||
-          detail.contains('no_propositions')) {
-        return const [];
-      }
+      if (_isNoPropositions(_detailOf(resp.data))) return const [];
       throw GciApiException(
           _detailOf(resp.data) ?? 'Failed to load ideas to review');
     }
+
     final data = resp.data;
     final list = data is Map
         ? (data['samples'] ?? data['propositions'] ?? data['ideas'] ?? [])
         : data;
-    return ((list as List?) ?? const [])
+    final ideas = ((list as List?) ?? const [])
         .whereType<Map>()
         .map((p) => PeerIdea.fromJson(p.cast<String, dynamic>()))
         .where((p) => p.id.isNotEmpty)
         .toList();
+    if (ideas.isNotEmpty) return ideas;
+
+    // Empty sample set on a 200. The backend returns `samples: []` for several
+    // distinct reasons, recorded in `sampling_metadata.error_type`. Only the
+    // "no propositions yet" case should put the reviewer in a waiting state;
+    // every other case is a sampler error and must surface (so the UI shows an
+    // error with retry) instead of looping in the waiting room.
+    final meta = data is Map ? data['sampling_metadata'] : null;
+    final errorType = meta is Map ? meta['error_type']?.toString() : null;
+    const waitErrorTypes = {'no_propositions_in_session', 'no_propositions'};
+    if (errorType == null || waitErrorTypes.contains(errorType)) {
+      return const []; // genuinely waiting for peer ideas
+    }
+    final message = meta is Map ? meta['error']?.toString() : null;
+    throw GciApiException(
+        message ?? 'Could not load ideas to review ($errorType)');
+  }
+
+  bool _isNoPropositions(String? detail) {
+    final d = detail?.toLowerCase() ?? '';
+    return d.contains('no propositions') || d.contains('no_propositions');
   }
 
   Future<void> submitReviews({
@@ -229,27 +250,87 @@ class GciRepository {
   }
 
   // ---------------------------------------------------------------
-  // Live updates (SSE)
+  // IdeaJam: warm-up discussion (browse, query, build-on, flag)
   // ---------------------------------------------------------------
 
-  /// Subscribe to the jam's live event channel. Emits whenever proposition or
-  /// review counts change server-side.
-  Stream<JamUpdateEvent> jamEvents(String jamId) {
-    return SSEClient.subscribeToSSE(
-      method: SSERequestType.GET,
-      url: '${AppConfig.apiBaseUrl}/api/jams/$jamId/events',
-      header: {'Accept': 'text/event-stream'},
-    ).where((event) => (event.data ?? '').trim().isNotEmpty).map((event) {
-      try {
-        final json = jsonDecode(event.data!.trim()) as Map<String, dynamic>;
-        return JamUpdateEvent.fromJson(json);
-      } catch (_) {
-        return const JamUpdateEvent(propositions: -1, reviews: -1);
-      }
-    }).where((e) => e.propositions >= 0);
+  /// All ideas in a jam's discussion, newest first.
+  Future<List<Idea>> fetchIdeas(String jamId) async {
+    final resp = await _client.dio.get('/api/jams/$jamId/propositions');
+    _ensureOk(resp.statusCode, 'load discussion', detail: _detailOf(resp.data));
+    final data = resp.data;
+    final list = data is Map ? (data['propositions'] ?? data['ideas'] ?? []) : data;
+    final ideas = ((list as List?) ?? const [])
+        .whereType<Map>()
+        .map((p) => Idea.fromJson(p.cast<String, dynamic>()))
+        .where((i) => i.id.isNotEmpty)
+        .toList()
+      ..sort((a, b) => (b.createdAt ?? '').compareTo(a.createdAt ?? ''));
+    return ideas;
   }
 
-  void closeJamEvents() => SSEClient.unsubscribeFromSSE();
+  /// Replies/questions on a single idea, oldest first.
+  Future<List<IdeaReply>> fetchReplies(String ideaId) async {
+    final resp = await _client.dio.get('/api/propositions/$ideaId/replies');
+    _ensureOk(resp.statusCode, 'load replies', detail: _detailOf(resp.data));
+    final data = resp.data;
+    final list = data is Map ? (data['replies'] ?? []) : data;
+    return ((list as List?) ?? const [])
+        .whereType<Map>()
+        .map((r) => IdeaReply.fromJson(r.cast<String, dynamic>()))
+        .toList();
+  }
+
+  /// Ask a question on an idea. When the idea's author is an AI agent, the
+  /// backend generates an answer asynchronously (surfaced on the reply).
+  Future<void> postReply({
+    required String ideaId,
+    required String questionerId,
+    required String questionerName,
+    required String promptText,
+  }) async {
+    final resp =
+        await _client.dio.post('/api/propositions/$ideaId/replies', data: {
+      'prompt_text': promptText,
+      'questioner_id': questionerId,
+      'questioner_name': questionerName,
+      'questioner_type': 'human',
+    });
+    _ensureOk(resp.statusCode, 'post question', detail: _detailOf(resp.data));
+  }
+
+  /// Create a new idea that builds on an existing one.
+  Future<void> buildOnIdea({
+    required String ideaId,
+    required String jamId,
+    required String builderId,
+    required String builderName,
+    required String newIdeaText,
+  }) async {
+    final resp =
+        await _client.dio.post('/api/propositions/$ideaId/build-on', data: {
+      'new_idea_text': newIdeaText,
+      'builder_id': builderId,
+      'builder_name': builderName,
+      'builder_type': 'human',
+      'jam_id': jamId,
+    });
+    _ensureOk(resp.statusCode, 'build on idea', detail: _detailOf(resp.data));
+  }
+
+  /// Flag an idea (misinformation | suspicious | inappropriate).
+  Future<void> flagIdea({
+    required String ideaId,
+    required String flagName,
+    required String whoFlagged,
+    String? reason,
+  }) async {
+    final resp = await _client.dio.post('/api/propositions/$ideaId/flag', data: {
+      'flag_name': flagName,
+      'who_flagged': whoFlagged,
+      if (reason != null && reason.isNotEmpty) 'reason': reason,
+    });
+    _ensureOk(resp.statusCode, 'flag idea', detail: _detailOf(resp.data));
+  }
 
   // ---------------------------------------------------------------
   // Light creator

@@ -9,6 +9,7 @@ import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
 import 'features/create/create_jam_screen.dart';
 import 'features/home/shell_screen.dart';
+import 'features/jam/idea_jam_screen.dart';
 import 'features/jam/jam_detail_screen.dart';
 import 'features/jam/participate_screen.dart';
 import 'features/jam/results_screen.dart';
@@ -66,8 +67,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/forgot-password',
           builder: (_, __) => const ForgotPasswordScreen()),
       GoRoute(path: '/create', builder: (_, __) => const CreateJamScreen()),
+      // Joining a jam lands in the warm-up discussion (IdeaJam).
       GoRoute(
           path: '/jam/:id',
+          builder: (_, state) =>
+              IdeaJamScreen(jamId: state.pathParameters['id']!)),
+      // The overview/funnel/prompts now live behind the discussion's info action.
+      GoRoute(
+          path: '/jam/:id/about',
           builder: (_, state) =>
               JamDetailScreen(jamId: state.pathParameters['id']!)),
       GoRoute(

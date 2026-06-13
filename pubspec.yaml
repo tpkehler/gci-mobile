@@ -16,7 +16,6 @@ dependencies:
 
   # Networking
   dio: ^5.7.0
-  flutter_client_sse: ^2.0.2
 
   # Navigation + deep links (go_router consumes platform deep links natively)
   go_router: ^14.6.2

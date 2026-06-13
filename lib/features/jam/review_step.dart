@@ -53,8 +53,7 @@ class _ReviewStepState extends ConsumerState<ReviewStep> {
   bool _submitted = false;
   String? _error;
 
-  StreamSubscription<JamUpdateEvent>? _sse;
-  Timer? _fallbackTimer;
+  Timer? _pollTimer;
   late final DateTime _loadedAt = DateTime.now();
 
   @override
@@ -105,36 +104,14 @@ class _ReviewStepState extends ConsumerState<ReviewStep> {
   }
 
   void _startWaiting() {
-    if (_sse != null || _fallbackTimer != null) return;
-    final repo = ref.read(repositoryProvider);
-    try {
-      _sse = repo.jamEvents(widget.jamId).listen(
-        (_) => _load(),
-        onError: (_) {
-          _sse?.cancel();
-          _sse = null;
-          _startFallbackPolling();
-        },
-      );
-    } catch (_) {
-      _startFallbackPolling();
-    }
-  }
-
-  void _startFallbackPolling() {
     if (!mounted) return;
-    _fallbackTimer ??=
-        Timer.periodic(const Duration(seconds: 12), (_) => _load());
+    // Poll every 12s while no peer ideas are available yet.
+    _pollTimer ??= Timer.periodic(const Duration(seconds: 12), (_) => _load());
   }
 
   void _stopWaiting() {
-    if (_sse != null) {
-      _sse!.cancel();
-      _sse = null;
-      ref.read(repositoryProvider).closeJamEvents();
-    }
-    _fallbackTimer?.cancel();
-    _fallbackTimer = null;
+    _pollTimer?.cancel();
+    _pollTimer = null;
   }
 
   void _setSentiment(String ideaId, ReviewSentiment sentiment) {
