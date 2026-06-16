@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme.dart';
+import '../../widgets/jam_brand.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -73,29 +73,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: const BoxDecoration(
-                      gradient: GciTheme.brandGradient,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.psychology,
-                        size: 40, color: Colors.white),
-                  ),
+                  const Center(child: JamGlyph(size: 76)),
                   const SizedBox(height: 16),
-                  Text('Collective Reasoning',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: 4),
+                  const Center(child: JamWordmark(onDark: false, fontSize: 34)),
+                  const SizedBox(height: 12),
                   Text(
                     _cameFromInvite
                         ? 'Sign in or continue as a guest to join the jam'
-                        : 'Sign in to your GCI account',
+                        : 'Sign in to your Jam account',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => context.push('/about'),
+                      icon: const Icon(Icons.help_outline, size: 18),
+                      label: const Text('What is Jam?'),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   if (_error != null) ...[
                     Card(
                       color: Theme.of(context).colorScheme.errorContainer,
@@ -163,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('New to GCI?'),
+                      const Text('New to Jam?'),
                       TextButton(
                         onPressed: () => context.push(
                             '/register${widget.redirectTo != null ? '?from=${Uri.encodeComponent(widget.redirectTo!)}' : ''}'),

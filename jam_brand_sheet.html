@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jam — Brand Sheet</title>
+<style>
+  :root{
+    --charcoal:#26282D; --ink:#1C1E22; --teal:#74B3AA; --light:#A8D6CE;
+    --deep:#5C8B84; --amber:#F0C079; --on-light-teal:#2E6B63;
+    --grey:#8A8F98; --line:#3A3D44; --paper:#F4F2EE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--charcoal); color:#E8ECEB;
+    font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+    line-height:1.6; padding:48px 32px; -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:920px;margin:0 auto}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:0.22em;color:var(--teal);text-transform:uppercase}
+  .muted{color:var(--grey)}
+  section{margin-top:56px}
+  h2{font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);
+     padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:24px}
+
+  /* hero */
+  .hero{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--ink)}
+  .hero svg{display:block;width:100%;height:auto}
+  .hero-cap{padding:16px 22px;border-top:1px solid var(--line);font-size:13px;color:var(--grey)}
+  .hero-cap strong{color:var(--light);font-weight:500;font-style:italic}
+
+  /* naming ladder */
+  .ladder{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .rung{display:grid;grid-template-columns:170px 1fr;gap:20px;background:var(--charcoal);padding:18px 22px;align-items:baseline}
+  .rung .term{font-size:19px;font-weight:700;letter-spacing:-0.01em}
+  .rung .term.jam{color:#fff} .rung .term.km{color:var(--light)} .rung .term.ciq{color:var(--teal)} .rung .term.cs{color:#fff}
+  .rung .desc{font-size:14.5px;color:#C4CBC9}
+  .rung .arrow{font-size:11px;color:var(--grey);letter-spacing:0.1em}
+
+  /* lockups */
+  .lockups{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .swatchcard{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .swatchcard .body{padding:30px;display:flex;align-items:center;justify-content:center;min-height:150px}
+  .swatchcard .body.dark{background:var(--charcoal)}
+  .swatchcard .body.lite{background:var(--paper)}
+  .swatchcard .label{font-size:12px;color:var(--grey);padding:10px 16px;border-top:1px solid var(--line)}
+  .lockup{display:flex;align-items:center;gap:16px}
+  .wm{font-size:46px;font-weight:700;letter-spacing:-0.03em;line-height:1;padding-bottom:6px;border-bottom:3px solid var(--teal)}
+  .wm.dk{color:#fff} .wm.lt{color:var(--charcoal);border-bottom-color:var(--on-light-teal)}
+  .endorse{font-size:11px;font-weight:600;letter-spacing:0.16em;color:var(--grey);margin-top:8px}
+
+  /* color */
+  .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  .chip{border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .chip .fill{height:64px}
+  .chip .meta{padding:8px 10px;font-size:11px}
+  .chip .nm{font-weight:600;color:#E8ECEB}
+  .chip .hex{color:var(--grey);font-family:ui-monospace,Menlo,monospace;font-size:10.5px}
+  .rule-note{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .rule-note div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px;color:#C4CBC9}
+  .rule-note .k{font-weight:600;letter-spacing:0.04em}
+  .rule-note .teal .k{color:var(--teal)} .rule-note .amber .k{color:var(--amber)}
+
+  /* rules list */
+  .rules{display:grid;grid-template-columns:1fr 1fr;gap:12px 32px}
+  .rules div{font-size:14px;color:#C4CBC9;padding-left:18px;position:relative}
+  .rules div::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--teal)}
+
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--grey);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media (max-width:680px){
+    .lockups,.rules,.rule-note{grid-template-columns:1fr}
+    .palette{grid-template-columns:repeat(3,1fr)}
+    .rung{grid-template-columns:1fr;gap:6px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero svg animate{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="eyebrow">Brand Sheet · v0.2</div>
+  <div style="display:flex;align-items:baseline;gap:14px;margin-top:8px;flex-wrap:wrap">
+    <span style="font-size:52px;font-weight:700;letter-spacing:-0.03em;color:#fff;border-bottom:4px solid var(--teal);padding-bottom:4px;line-height:1">Jam</span>
+    <span class="muted" style="font-size:15px">by CrowdSmart</span>
+  </div>
+  <p class="muted" style="margin-top:18px;font-size:16px;max-width:640px">
+    Like a great jazz session, the destination isn&rsquo;t scripted. It emerges from the interaction &mdash;
+    every contribution influences the next, and every session leaves the organization smarter than before.
+  </p>
+
+  <section>
+    <h2>The signature &mdash; the live belief field</h2>
+    <div class="hero">
+      <svg viewBox="0 0 860 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="The live belief field resolving into coherence">
+        <title>Jam live belief field</title>
+        <rect x="0" y="0" width="860" height="400" fill="#1C1E22"/>
+        <g transform="translate(430,180)">
+          <g stroke="#74B3AA" stroke-width="1.6" fill="none">
+            <line x1="-150" y1="0" x2="-70" y2="0"><animate attributeName="opacity" values="0;0;0.7;0.8" dur="7s" keyTimes="0;0.5;0.74;1" repeatCount="indefinite"/></line>
+            <line x1="-70" y1="0" x2="10" y2="0"><animate attributeName="opacity" values="0;0;0.7;0.8" dur="7s" keyTimes="0;0.54;0.78;1" repeatCount="indefinite"/></line>
+            <line x1="10" y1="0" x2="90" y2="0"><animate attributeName="opacity" values="0;0;0.7;0.8" dur="7s" keyTimes="0;0.58;0.82;1" repeatCount="indefinite"/></line>
+            <line x1="90" y1="0" x2="170" y2="0"><animate attributeName="opacity" values="0;0;0.7;0.8" dur="7s" keyTimes="0;0.62;0.86;1" repeatCount="indefinite"/></line>
+            <line x1="-70" y1="0" x2="-30" y2="-46"><animate attributeName="opacity" values="0;0;0.55;0.65" dur="7s" keyTimes="0;0.6;0.84;1" repeatCount="indefinite"/></line>
+            <line x1="90" y1="0" x2="50" y2="46"><animate attributeName="opacity" values="0;0;0.55;0.65" dur="7s" keyTimes="0;0.64;0.88;1" repeatCount="indefinite"/></line>
+          </g>
+          <circle r="8" fill="#74B3AA"><animate attributeName="cx" values="-150;-128;-156;-150;-150" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="-70;58;-22;0;0" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="8" fill="#A8D6CE"><animate attributeName="cx" values="-44;-92;-58;-70;-70" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="86;-40;36;0;0" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="9" fill="#74B3AA"><animate attributeName="cx" values="34;-12;40;10;10" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="-88;48;-30;0;0" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="8" fill="#A8D6CE"><animate attributeName="cx" values="118;70;104;90;90" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="92;-34;40;0;0" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="10" fill="#A8D6CE"><animate attributeName="cx" values="172;150;180;170;170" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="-78;52;-18;0;0" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="7" fill="#74B3AA"><animate attributeName="cx" values="-26;-58;-18;-30;-30" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="-96;-30;-58;-46;-46" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle r="7" fill="#74B3AA"><animate attributeName="cx" values="58;26;66;50;50" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/><animate attributeName="cy" values="100;36;64;46;46" dur="7s" keyTimes="0;0.28;0.52;0.7;1" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/></circle>
+          <circle cx="10" cy="0" r="0" fill="none" stroke="#F0C079" stroke-width="2.6"><animate attributeName="r" values="0;0;14;120;120" dur="7s" keyTimes="0;0.72;0.82;0.92;1" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0;0.95;0;0" dur="7s" keyTimes="0;0.72;0.8;0.92;1" repeatCount="indefinite"/></circle>
+          <circle cx="10" cy="0" r="0" fill="#F0C079"><animate attributeName="r" values="0;0;5;0" dur="7s" keyTimes="0;0.74;0.82;0.9" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0;0.8;0" dur="7s" keyTimes="0;0.74;0.82;0.9" repeatCount="indefinite"/></circle>
+        </g>
+      </svg>
+      <div class="hero-cap">
+        Seven voices interact, influence each other, and converge. The amber bloom marks coherence &mdash;
+        <strong>the resolution is earned, not scripted.</strong>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The architecture</h2>
+    <div class="ladder">
+      <div class="rung"><span class="term jam">Jam</span><span class="desc">The product, the experience, the verb. You <em>run</em> a Jam &mdash; a live, creative deliberation where people and AI agents reason together.</span></div>
+      <div class="rung"><span class="term km">Knowledge Model</span><span class="desc">What a single Jam produces &mdash; captured reasoning, peer-validated, with calibrated confidence.</span></div>
+      <div class="rung"><span class="term ciq">Collective IQ</span><span class="desc">The persistent value. The cumulative intelligence many Jams build over time &mdash; the asset that makes every future decision smarter.</span></div>
+      <div class="rung"><span class="term cs">CrowdSmart</span><span class="desc">The company and the endorsement. A decade of equity, four issued patents, the proven track record behind Jam.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Wordmark lockups</h2>
+    <div class="lockups">
+      <div class="swatchcard">
+        <div class="body dark">
+          <div class="lockup">
+            <svg width="76" height="76" viewBox="0 0 116 116" aria-hidden="true">
+              <rect width="116" height="116" rx="26" fill="#1C1E22"/>
+              <circle cx="58" cy="58" r="42" fill="none" stroke="#3F5D58" stroke-width="1.4" opacity="0.7"/>
+              <circle cx="58" cy="58" r="29" fill="none" stroke="#5C8B84" stroke-width="1.6"/>
+              <circle cx="58" cy="58" r="16" fill="none" stroke="#74B3AA" stroke-width="2"/>
+              <circle cx="58" cy="16" r="3.4" fill="#5C8B84"/><circle cx="96" cy="46" r="3.4" fill="#5C8B84"/><circle cx="82" cy="92" r="3.4" fill="#5C8B84"/><circle cx="28" cy="88" r="3.4" fill="#5C8B84"/><circle cx="20" cy="44" r="3.4" fill="#5C8B84"/>
+              <circle cx="58" cy="29" r="3.8" fill="#74B3AA"/><circle cx="83" cy="58" r="3.8" fill="#74B3AA"/><circle cx="58" cy="87" r="3.8" fill="#74B3AA"/><circle cx="33" cy="58" r="3.8" fill="#74B3AA"/>
+              <circle cx="58" cy="58" r="8" fill="#A8D6CE"/>
+            </svg>
+            <div><div class="wm dk">Jam</div><div class="endorse">BY CROWDSMART</div></div>
+          </div>
+        </div>
+        <div class="label">Primary &mdash; on charcoal / dark</div>
+      </div>
+      <div class="swatchcard">
+        <div class="body lite">
+          <div class="lockup">
+            <svg width="76" height="76" viewBox="0 0 116 116" aria-hidden="true">
+              <rect width="116" height="116" rx="26" fill="#26282D"/>
+              <circle cx="58" cy="58" r="42" fill="none" stroke="#9DBFB9" stroke-width="1.4" opacity="0.8"/>
+              <circle cx="58" cy="58" r="29" fill="none" stroke="#5C8B84" stroke-width="1.6"/>
+              <circle cx="58" cy="58" r="16" fill="none" stroke="#4A8C84" stroke-width="2"/>
+              <circle cx="58" cy="16" r="3.4" fill="#5C8B84"/><circle cx="96" cy="46" r="3.4" fill="#5C8B84"/><circle cx="82" cy="92" r="3.4" fill="#5C8B84"/><circle cx="28" cy="88" r="3.4" fill="#5C8B84"/><circle cx="20" cy="44" r="3.4" fill="#5C8B84"/>
+              <circle cx="58" cy="29" r="3.8" fill="#74B3AA"/><circle cx="83" cy="58" r="3.8" fill="#74B3AA"/><circle cx="58" cy="87" r="3.8" fill="#74B3AA"/><circle cx="33" cy="58" r="3.8" fill="#74B3AA"/>
+              <circle cx="58" cy="58" r="8" fill="#2E6B63"/>
+            </svg>
+            <div><div class="wm lt">Jam</div><div class="endorse" style="color:#6A6F78">BY CROWDSMART</div></div>
+          </div>
+        </div>
+        <div class="label">Inverse &mdash; on light / paper</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Color &mdash; teal primary, amber earned</h2>
+    <div class="palette">
+      <div class="chip"><div class="fill" style="background:#26282D"></div><div class="meta"><div class="nm">Charcoal</div><div class="hex">#26282D</div></div></div>
+      <div class="chip"><div class="fill" style="background:#1C1E22"></div><div class="meta"><div class="nm">Ink</div><div class="hex">#1C1E22</div></div></div>
+      <div class="chip"><div class="fill" style="background:#74B3AA"></div><div class="meta"><div class="nm">Teal</div><div class="hex">#74B3AA</div></div></div>
+      <div class="chip"><div class="fill" style="background:#A8D6CE"></div><div class="meta"><div class="nm">Light teal</div><div class="hex">#A8D6CE</div></div></div>
+      <div class="chip"><div class="fill" style="background:#5C8B84"></div><div class="meta"><div class="nm">Deep teal</div><div class="hex">#5C8B84</div></div></div>
+      <div class="chip"><div class="fill" style="background:#F0C079"></div><div class="meta"><div class="nm">Amber</div><div class="hex">#F0C079</div></div></div>
+    </div>
+    <div class="rule-note">
+      <div class="teal"><span class="k">Teal is the default.</span> Brand, UI, type, the resting field. Carries trust and premium.</div>
+      <div class="amber"><span class="k">Amber is earned.</span> Only the moment of coherence &mdash; convergence, live demos, energy beats. Never body or UI.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rules</h2>
+    <div class="rules">
+      <div>&ldquo;Jam&rdquo; set with a single teal resonance underline &mdash; the field&rsquo;s coherence carried into type.</div>
+      <div>The glyph is a belief field: rim voices resolving inward to a bright coherent center.</div>
+      <div>&ldquo;by CrowdSmart&rdquo; is the endorsement &mdash; always smaller, present on first/primary use.</div>
+      <div>Below ~24px the icon keeps one ring and the bright center; drop the rim nodes.</div>
+      <div>Run a <em>Jam</em> (verb). Many Jams build <em>Collective IQ</em> (the persistent asset).</div>
+      <div>Tagline: &ldquo;Every session leaves the organization smarter than before.&rdquo;</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Jam &middot; a CrowdSmart product &middot; stake-in-the-ground identity</span>
+    <span class="muted">Not yet trademark / domain cleared &mdash; verify before public use.</span>
+  </footer>
+
+</div>
+</body>
+</html>

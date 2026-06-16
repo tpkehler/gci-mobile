@@ -276,64 +276,25 @@ class _IdeaCardState extends ConsumerState<_IdeaCard> {
   }
 
   /// Bottom-sheet composer; returns trimmed text, or null if cancelled/too short.
+  /// The sheet body owns its own [TextEditingController] (see [_ComposeSheet]) so
+  /// the controller is disposed with the widget tree after the close animation —
+  /// disposing it here synchronously races the dismissal and crashes.
   Future<String?> _composeSheet({
     required String title,
     required String hint,
     required String submitLabel,
     required int minChars,
-  }) async {
-    final controller = TextEditingController();
-    final result = await showModalBottomSheet<String>(
+  }) {
+    return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(title, style: Theme.of(ctx).textTheme.titleMedium),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                minLines: 2,
-                maxLines: 6,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () {
-                  final t = controller.text.trim();
-                  if (t.length < minChars) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                      content: Text(minChars > 1
-                          ? 'Please enter at least $minChars characters'
-                          : 'Please enter a question'),
-                    ));
-                    return;
-                  }
-                  Navigator.pop(ctx, t);
-                },
-                child: Text(submitLabel),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (ctx) => _ComposeSheet(
+        title: title,
+        hint: hint,
+        submitLabel: submitLabel,
+        minChars: minChars,
+      ),
     );
-    controller.dispose();
-    return result;
   }
 
   @override
@@ -585,6 +546,82 @@ class _EngageBar extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Bottom-sheet body that owns its [TextEditingController] for its lifetime,
+/// disposing it in [State.dispose] after the sheet is fully gone.
+class _ComposeSheet extends StatefulWidget {
+  const _ComposeSheet({
+    required this.title,
+    required this.hint,
+    required this.submitLabel,
+    required this.minChars,
+  });
+
+  final String title;
+  final String hint;
+  final String submitLabel;
+  final int minChars;
+
+  @override
+  State<_ComposeSheet> createState() => _ComposeSheetState();
+}
+
+class _ComposeSheetState extends State<_ComposeSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(widget.title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            minLines: 2,
+            maxLines: 6,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () {
+              final t = _controller.text.trim();
+              if (t.length < widget.minChars) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(widget.minChars > 1
+                      ? 'Please enter at least ${widget.minChars} characters'
+                      : 'Please enter a question'),
+                ));
+                return;
+              }
+              Navigator.pop(context, t);
+            },
+            child: Text(widget.submitLabel),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,5 @@
 name: gci_mobile
-description: "GCI native mobile app — a Flutter frontend for the gcibmn collective-intelligence API."
+description: "Jam by CrowdSmart — a Flutter mobile frontend for the gcibmn collective-intelligence API."
 publish_to: 'none'
 
 version: 0.1.0+1
@@ -50,8 +50,8 @@ flutter_launcher_icons:
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#4F46E5"
+  color: "#1C1E22"
   image: assets/icon.png
   android_12:
-    color: "#4F46E5"
+    color: "#1C1E22"
     image: assets/icon.png

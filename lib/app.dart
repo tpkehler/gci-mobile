@@ -13,6 +13,10 @@ import 'features/jam/idea_jam_screen.dart';
 import 'features/jam/jam_detail_screen.dart';
 import 'features/jam/participate_screen.dart';
 import 'features/jam/results_screen.dart';
+import 'features/onboarding/about_screen.dart';
+import 'features/onboarding/onboarding_controller.dart';
+import 'features/onboarding/welcome_screen.dart';
+import 'widgets/jam_brand.dart';
 
 /// Routes mirror the web app URLs so invite links
 /// (https://…/jam/:id/participate, legacy /collaborate/:id) deep-link
@@ -21,14 +25,18 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authListenable = ValueNotifier<int>(0);
   ref
     ..onDispose(authListenable.dispose)
-    ..listen(authControllerProvider, (_, __) => authListenable.value++);
+    ..listen(authControllerProvider, (_, __) => authListenable.value++)
+    ..listen(onboardingControllerProvider, (_, __) => authListenable.value++);
 
   return GoRouter(
     initialLocation: '/',
     refreshListenable: authListenable,
     redirect: (context, state) {
       final auth = ref.read(authControllerProvider);
-      if (!auth.initialized) return null; // splash handles startup
+      final onboarding = ref.read(onboardingControllerProvider);
+      if (!auth.initialized || !onboarding.initialized) {
+        return null; // splash handles startup
+      }
 
       final path = state.uri.path;
       final isAuthRoute = path == '/login' ||
@@ -37,13 +45,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isJamRoute =
           path.startsWith('/jam/') || path.startsWith('/collaborate/');
 
+      // First-run intro: show it once, but never block invite deep links or
+      // the welcome screen itself.
+      if (!onboarding.seenIntro && !isJamRoute && path != '/welcome') {
+        return '/welcome';
+      }
+
       if (!auth.isSignedIn) {
         // Jam deep links are reachable signed-out: send to login carrying the
         // destination, where "Continue as guest" is offered.
         if (isJamRoute) {
           return '/login?from=${Uri.encodeComponent(state.uri.toString())}';
         }
-        return isAuthRoute ? null : '/login';
+        // Welcome + About are reachable signed-out (learn before signing in).
+        if (path == '/welcome' || path == '/about' || isAuthRoute) return null;
+        return '/login';
       }
       if (isAuthRoute) return '/';
       // Legacy invite URL -> canonical participate URL.
@@ -55,6 +71,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/', builder: (_, __) => const ShellScreen()),
+      GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
+      GoRoute(path: '/about', builder: (_, __) => const AboutScreen()),
       GoRoute(
           path: '/login',
           builder: (_, state) =>
@@ -104,17 +122,18 @@ class GciApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-    if (!auth.initialized) {
+    final onboarding = ref.watch(onboardingControllerProvider);
+    if (!auth.initialized || !onboarding.initialized) {
       return MaterialApp(
-        title: 'GCI',
-        theme: GciTheme.light(),
-        darkTheme: GciTheme.dark(),
-        home: const _SplashScreen(),
+        title: 'Jam',
+      theme: GciTheme.light(),
+      darkTheme: GciTheme.dark(),
+      home: const _SplashScreen(),
         debugShowCheckedModeBanner: false,
       );
     }
     return MaterialApp.router(
-      title: 'GCI',
+      title: 'Jam',
       theme: GciTheme.light(),
       darkTheme: GciTheme.dark(),
       routerConfig: ref.watch(routerProvider),
@@ -129,21 +148,34 @@ class _SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: GciTheme.brandGradient),
-        child: const Center(
+      backgroundColor: GciTheme.brandInk,
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.psychology, size: 72, color: Colors.white),
-              SizedBox(height: 16),
-              Text('GCI',
+              const SizedBox(
+                width: 320,
+                height: 168,
+                child: LiveBeliefField(),
+              ),
+              const SizedBox(height: 8),
+              const JamWordmark(onDark: true, fontSize: 44),
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  "the destination isn't scripted — it emerges from the "
+                  'interaction',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold)),
-              SizedBox(height: 24),
-              CircularProgressIndicator(color: Colors.white),
+                    color: GciTheme.brandTealLight.withValues(alpha: 0.75),
+                    fontSize: 12.5,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

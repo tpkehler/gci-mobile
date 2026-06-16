@@ -47,6 +47,15 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           Card(
+            child: ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: const Text('Help & how it works'),
+              subtitle: const Text('What Jam is and how a Jam flows'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/about'),
+            ),
+          ),
+          Card(
             child: Column(
               children: [
                 ListTile(
