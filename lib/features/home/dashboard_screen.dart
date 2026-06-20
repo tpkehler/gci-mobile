@@ -15,7 +15,7 @@ final dashboardProvider = FutureProvider.autoDispose<DashboardData>((ref) {
   return ref.watch(repositoryProvider).fetchDashboard(session.userId);
 });
 
-/// "My Jams": created + contributing, with archive management for creators.
+/// Jams the user created — track collective results.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -75,27 +75,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           final created = data.createdJams
               .where((j) => _showArchived || !j.isArchived)
               .toList();
-          final contributing = data.contributingJams
-              .where((j) => !j.isArchived)
-              .toList();
-          if (created.isEmpty && contributing.isEmpty) {
+          if (created.isEmpty) {
             return const EmptyView(
               icon: Icons.lightbulb_outline,
               title: 'No jams yet',
               subtitle:
-                  'Create a jam or join one from an invitation to get started.',
+                  'Create a jam to facilitate a group and track collective results.',
             );
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(dashboardProvider),
             child: ListView(
-              padding: const EdgeInsets.only(top: 8, bottom: 96),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
               children: [
-                if (created.isNotEmpty) ...[
-                  const _SectionHeader('Created by you'),
-                  ...created.map((jam) => JamCard(
-                        jam: jam,
-                        trailing: IconButton(
+                Text(
+                  'Jams you created — tap to track collective intelligence results.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                ...created.map(
+                  (jam) => JamCard(
+                    jam: jam,
+                    onTap: () => context.push('/jam/${jam.id}/results'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
                           icon: Icon(jam.isArchived
                               ? Icons.unarchive_outlined
                               : Icons.archive_outlined),
@@ -103,35 +108,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           visualDensity: VisualDensity.compact,
                           onPressed: () => _toggleArchive(jam),
                         ),
-                      )),
-                ],
-                if (contributing.isNotEmpty) ...[
-                  const _SectionHeader('Contributing'),
-                  ...contributing.map((jam) => JamCard(jam: jam)),
-                ],
+                        Icon(
+                          Icons.insights_outlined,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           );
         },
       ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-      child: Text(title,
-          style: Theme.of(context)
-              .textTheme
-              .titleSmall
-              ?.copyWith(color: Theme.of(context).hintColor)),
     );
   }
 }

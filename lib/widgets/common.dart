@@ -120,10 +120,11 @@ class JamStatusChip extends StatelessWidget {
 
 /// Jam list card used by dashboard and discovery.
 class JamCard extends StatelessWidget {
-  const JamCard({super.key, required this.jam, this.trailing});
+  const JamCard({super.key, required this.jam, this.trailing, this.onTap});
 
   final Jam jam;
   final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +132,7 @@ class JamCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push('/jam/${jam.id}'),
+        onTap: onTap ?? () => context.push('/jam/${jam.id}'),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

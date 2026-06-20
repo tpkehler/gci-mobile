@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_controller.dart';
 import 'dashboard_screen.dart';
 import 'discover_screen.dart';
+import 'explore_screen.dart';
 import 'my_wiki_screen.dart';
 import 'profile_screen.dart';
 
-/// Root tab shell: My Jams · Discover · My Wiki · Profile.
+/// Root tab shell: My Jams · Participate · Explore · My Wiki · Profile.
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key});
 
@@ -21,10 +22,11 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   @override
   Widget build(BuildContext context) {
     final isGuest = ref.watch(authControllerProvider).isGuest;
-    // Guests have no dashboard data; start them on Discover.
+    // Guests have no dashboard data; start them on Participate.
     final pages = [
       if (!isGuest) const DashboardScreen(),
-      const DiscoverScreen(),
+      const ParticipateScreen(),
+      const ExploreScreen(),
       if (!isGuest) const MyWikiScreen(),
       const ProfileScreen(),
     ];
@@ -35,9 +37,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
             selectedIcon: Icon(Icons.space_dashboard),
             label: 'My Jams'),
       const NavigationDestination(
+          icon: Icon(Icons.how_to_reg_outlined),
+          selectedIcon: Icon(Icons.how_to_reg),
+          label: 'Participate'),
+      const NavigationDestination(
           icon: Icon(Icons.explore_outlined),
           selectedIcon: Icon(Icons.explore),
-          label: 'Discover'),
+          label: 'Explore'),
       if (!isGuest)
         const NavigationDestination(
             icon: Icon(Icons.auto_stories_outlined),

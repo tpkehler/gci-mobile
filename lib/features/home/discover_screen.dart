@@ -13,36 +13,58 @@ final activeJamsProvider = FutureProvider.autoDispose<List<Jam>>((ref) {
       .fetchActiveJams(userId: session?.isGuest == false ? session?.userId : null);
 });
 
-/// Public/active jam discovery.
-class DiscoverScreen extends ConsumerWidget {
-  const DiscoverScreen({super.key});
+/// Jams open for participation (excludes jams the user created).
+final participateJamsProvider = FutureProvider.autoDispose<List<Jam>>((ref) {
+  final session = ref.watch(authControllerProvider).session;
+  final userId = session?.isGuest == false ? session?.userId : null;
+  return ref.watch(activeJamsProvider.future).then((jams) {
+    if (userId == null) return jams.where((j) => !j.isArchived).toList();
+    return jams
+        .where((j) => !j.isArchived && j.creatorId != userId)
+        .toList();
+  });
+});
+
+/// Jams the user can join and participate in.
+class ParticipateScreen extends ConsumerWidget {
+  const ParticipateScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final jams = ref.watch(activeJamsProvider);
+    final jams = ref.watch(participateJamsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Discover Jams')),
+      appBar: AppBar(title: const Text('Participate')),
       body: jams.when(
-        loading: () => const LoadingView(message: 'Finding active jams...'),
+        loading: () => const LoadingView(message: 'Finding jams...'),
         error: (e, _) => ErrorView(
           message: apiErrorMessage(e),
-          onRetry: () => ref.invalidate(activeJamsProvider),
+          onRetry: () => ref.invalidate(participateJamsProvider),
         ),
         data: (list) {
-          final visible = list.where((j) => !j.isArchived).toList();
-          if (visible.isEmpty) {
+          if (list.isEmpty) {
             return const EmptyView(
-              icon: Icons.explore_outlined,
-              title: 'No active jams',
-              subtitle: 'Jams shared with you or your community appear here.',
+              icon: Icons.how_to_reg_outlined,
+              title: 'Nothing to join yet',
+              subtitle:
+                  'Invited jams and public jams you can contribute to appear here.',
             );
           }
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(activeJamsProvider),
+            onRefresh: () async {
+              ref.invalidate(activeJamsProvider);
+              ref.invalidate(participateJamsProvider);
+            },
             child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: visible.map((jam) => JamCard(jam: jam)).toList(),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              children: [
+                Text(
+                  'Join a jam, discuss ideas, and share your predictions.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                ...list.map((jam) => JamCard(jam: jam)),
+              ],
             ),
           );
         },
@@ -50,3 +72,6 @@ class DiscoverScreen extends ConsumerWidget {
     );
   }
 }
+
+/// @deprecated use [ParticipateScreen]
+typedef DiscoverScreen = ParticipateScreen;
