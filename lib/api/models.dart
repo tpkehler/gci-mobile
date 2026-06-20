@@ -576,7 +576,10 @@ class BbnSummary {
       ..sort((a, b) => b.probability.compareTo(a.probability));
     return BbnSummary(
       success: true,
-      finalCscore: _toDouble(json['final_cscore']),
+      finalCscore: _toDouble(json['final_cscore']) ??
+          _toDouble((json['summary'] is Map
+              ? (json['summary'] as Map)['final_cscore']
+              : null)),
       method: layer4 is Map ? layer4['method']?.toString() : null,
       themes: themes
           .whereType<Map>()
@@ -584,6 +587,24 @@ class BbnSummary {
           .where((t) => t.reasonCount > 0 && t.probability != null)
           .toList(),
       topReasons: parsedReasons.take(8).toList(),
+    );
+  }
+
+  factory BbnSummary.fromVisualizationJson(Map<String, dynamic> json) {
+    if (json['success'] == false) {
+      return BbnSummary(
+        success: false,
+        error: json['error']?.toString() ?? 'BBN unavailable',
+      );
+    }
+    final summary = json['summary'];
+    final summaryMap = summary is Map ? summary.cast<String, dynamic>() : null;
+    return BbnSummary(
+      success: true,
+      finalCscore: _toDouble(summaryMap?['final_cscore']),
+      method: summaryMap?['collective_score_method']?.toString(),
+      themes: const [],
+      topReasons: const [],
     );
   }
 }

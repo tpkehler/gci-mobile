@@ -414,9 +414,28 @@ class GciRepository {
   }
 
   Future<BbnSummary> fetchBbnSummary(String jamId) async {
-    final resp = await _client.dio.get('/api/bbn/calculate/$jamId');
-    _ensureOk(resp.statusCode, 'load belief map', detail: _detailOf(resp.data));
-    return BbnSummary.fromJson(_asMap(resp.data));
+    final calc = await _client.dio.get('/api/bbn/calculate/$jamId');
+    if (calc.statusCode == 200) {
+      final parsed = BbnSummary.fromJson(_asMap(calc.data));
+      if (parsed.success) return parsed;
+    }
+    final viz = await _client.dio.get('/api/bbn/visualization/$jamId');
+    _ensureOk(viz.statusCode, 'load belief map', detail: _detailOf(viz.data));
+    final fallback = BbnSummary.fromVisualizationJson(_asMap(viz.data));
+    if (fallback.success) return fallback;
+    if (calc.statusCode == 200) {
+      return BbnSummary.fromJson(_asMap(calc.data));
+    }
+    _ensureOk(calc.statusCode, 'load belief map', detail: _detailOf(calc.data));
+    return fallback;
+  }
+
+  Future<Map<String, dynamic>> fetchCollectiveVoiceStatus(String jamId) async {
+    final resp =
+        await _client.dio.get('/api/collective-voice/status/$jamId');
+    _ensureOk(resp.statusCode, 'load collective voice status',
+        detail: _detailOf(resp.data));
+    return _asMap(resp.data);
   }
 
   Future<WikiSummary> fetchWiki(String userId) async {

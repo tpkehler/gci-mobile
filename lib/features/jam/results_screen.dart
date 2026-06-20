@@ -27,6 +27,8 @@ class ResultsScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('Results'),
           bottom: const TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               Tab(text: 'Overview'),
               Tab(text: 'Ask Collective'),
@@ -98,12 +100,30 @@ class _CollectiveVoiceTabState extends ConsumerState<_CollectiveVoiceTab> {
   CollectiveVoiceResponse? _response;
   var _loading = false;
   String? _error;
+  Map<String, dynamic>? _status;
 
   static const _starters = [
     'What are the main themes emerging from this collaboration?',
     'Where does the group disagree most?',
     'What are the strongest reasons supporting the collective view?',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    try {
+      final status = await ref
+          .read(repositoryProvider)
+          .fetchCollectiveVoiceStatus(widget.jamId);
+      if (mounted) setState(() => _status = status);
+    } catch (_) {
+      // non-blocking
+    }
+  }
 
   @override
   void dispose() {
@@ -148,6 +168,20 @@ class _CollectiveVoiceTabState extends ConsumerState<_CollectiveVoiceTab> {
           'Ask about the cumulative conversation. Answers cite propositions from the Jam.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
+        if (_status != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _status!['available'] == true
+                ? 'Ready — ${_status!['embedded_propositions_count'] ?? 0} embedded propositions'
+                : (_status!['reason']?.toString() ??
+                    'Collective voice not ready yet'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: _status!['available'] == true
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.error,
+                ),
+          ),
+        ],
         const SizedBox(height: 16),
         TextField(
           controller: _controller,
