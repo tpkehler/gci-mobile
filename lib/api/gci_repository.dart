@@ -395,6 +395,66 @@ class GciRepository {
   }
 
   // ---------------------------------------------------------------
+  // Collective Voice, BBN, Personal Wiki
+  // ---------------------------------------------------------------
+
+  Future<CollectiveVoiceResponse> queryCollectiveVoice({
+    required String jamId,
+    required String question,
+    int maxSources = 5,
+  }) async {
+    final resp = await _client.dio.post('/api/collective-voice/query', data: {
+      'jam_id': jamId,
+      'question': question,
+      'max_sources': maxSources,
+    });
+    _ensureOk(resp.statusCode, 'query collective voice',
+        detail: _detailOf(resp.data));
+    return CollectiveVoiceResponse.fromJson(_asMap(resp.data));
+  }
+
+  Future<BbnSummary> fetchBbnSummary(String jamId) async {
+    final resp = await _client.dio.get('/api/bbn/calculate/$jamId');
+    _ensureOk(resp.statusCode, 'load belief map', detail: _detailOf(resp.data));
+    return BbnSummary.fromJson(_asMap(resp.data));
+  }
+
+  Future<WikiSummary> fetchWiki(String userId) async {
+    final resp = await _client.dio.get('/api/personal-agent/$userId/wiki');
+    _ensureOk(resp.statusCode, 'load wiki', detail: _detailOf(resp.data));
+    return WikiSummary.fromJson(_asMap(resp.data));
+  }
+
+  Future<WikiPageContent> fetchWikiPage(String userId, String slug) async {
+    final resp =
+        await _client.dio.get('/api/personal-agent/$userId/wiki/pages/$slug');
+    _ensureOk(resp.statusCode, 'load wiki page', detail: _detailOf(resp.data));
+    return WikiPageContent.fromJson(_asMap(resp.data), slug);
+  }
+
+  Future<WikiQueryResponse> queryWiki({
+    required String userId,
+    required String question,
+  }) async {
+    final resp = await _client.dio.post('/api/personal-agent/$userId/query',
+        data: {'question': question});
+    _ensureOk(resp.statusCode, 'query wiki', detail: _detailOf(resp.data));
+    return WikiQueryResponse.fromJson(_asMap(resp.data));
+  }
+
+  Future<void> ingestJamToWiki({
+    required String userId,
+    required String jamId,
+  }) async {
+    final resp = await _client.dio.post(
+      '/api/personal-agent/$userId/ingest-jam',
+      data: {'jam_id': jamId},
+    );
+    _ensureOk(resp.statusCode, 'update wiki from jam',
+        detail: _detailOf(resp.data));
+  }
+
+  // ---------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------
 

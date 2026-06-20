@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_controller.dart';
 import 'dashboard_screen.dart';
 import 'discover_screen.dart';
+import 'my_wiki_screen.dart';
 import 'profile_screen.dart';
 
-/// Root tab shell: Dashboard, Discover, Profile.
+/// Root tab shell: My Jams · Discover · My Wiki · Profile.
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key});
 
@@ -24,6 +25,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     final pages = [
       if (!isGuest) const DashboardScreen(),
       const DiscoverScreen(),
+      if (!isGuest) const MyWikiScreen(),
       const ProfileScreen(),
     ];
     final destinations = [
@@ -36,6 +38,11 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           icon: Icon(Icons.explore_outlined),
           selectedIcon: Icon(Icons.explore),
           label: 'Discover'),
+      if (!isGuest)
+        const NavigationDestination(
+            icon: Icon(Icons.auto_stories_outlined),
+            selectedIcon: Icon(Icons.auto_stories),
+            label: 'My Wiki'),
       const NavigationDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person),

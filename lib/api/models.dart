@@ -448,3 +448,206 @@ class AuthResult {
   final String? jwtToken;
   final String? error;
 }
+
+// ---------------------------------------------------------------
+// Collective Voice, BBN, Personal Wiki
+// ---------------------------------------------------------------
+
+class CollectiveVoiceSource {
+  const CollectiveVoiceSource({
+    required this.propositionId,
+    required this.text,
+    required this.contributorName,
+    this.contributorExpertise,
+    this.similarityScore = 0,
+    this.relevanceScore = 0,
+  });
+
+  final String propositionId;
+  final String text;
+  final String contributorName;
+  final String? contributorExpertise;
+  final double similarityScore;
+  final double relevanceScore;
+
+  factory CollectiveVoiceSource.fromJson(Map<String, dynamic> json) =>
+      CollectiveVoiceSource(
+        propositionId: json['proposition_id']?.toString() ?? '',
+        text: json['text'] as String? ?? '',
+        contributorName: json['contributor_name'] as String? ?? 'Anonymous',
+        contributorExpertise: json['contributor_expertise'] as String?,
+        similarityScore: _toDouble(json['similarity_score']) ?? 0,
+        relevanceScore: _toDouble(json['relevance_score']) ?? 0,
+      );
+}
+
+class CollectiveVoiceResponse {
+  const CollectiveVoiceResponse({
+    required this.answer,
+    required this.sources,
+    required this.question,
+  });
+
+  final String answer;
+  final List<CollectiveVoiceSource> sources;
+  final String question;
+
+  factory CollectiveVoiceResponse.fromJson(Map<String, dynamic> json) =>
+      CollectiveVoiceResponse(
+        answer: json['answer'] as String? ?? '',
+        question: json['question'] as String? ?? '',
+        sources: ((json['sources'] as List?) ?? const [])
+            .whereType<Map>()
+            .map((s) =>
+                CollectiveVoiceSource.fromJson(s.cast<String, dynamic>()))
+            .toList(),
+      );
+}
+
+class BbnThemeSummary {
+  const BbnThemeSummary({
+    required this.label,
+    required this.probability,
+    required this.reasonCount,
+  });
+
+  final String label;
+  final double? probability;
+  final int reasonCount;
+
+  factory BbnThemeSummary.fromJson(Map<String, dynamic> json) => BbnThemeSummary(
+        label: json['label'] as String? ??
+            'Theme ${json['theme_id'] ?? ''}'.trim(),
+        probability: _toDouble(json['probability']),
+        reasonCount: _toInt(json['n_reasons']),
+      );
+}
+
+class BbnReasonSummary {
+  const BbnReasonSummary({
+    required this.text,
+    required this.probability,
+  });
+
+  final String text;
+  final double probability;
+
+  factory BbnReasonSummary.fromJson(Map<String, dynamic> json) => BbnReasonSummary(
+        text: json['text'] as String? ?? '',
+        probability: _toDouble(json['probability']) ?? 0,
+      );
+}
+
+class BbnSummary {
+  const BbnSummary({
+    required this.success,
+    this.error,
+    this.finalCscore,
+    this.method,
+    this.themes = const [],
+    this.topReasons = const [],
+  });
+
+  final bool success;
+  final String? error;
+  final double? finalCscore;
+  final String? method;
+  final List<BbnThemeSummary> themes;
+  final List<BbnReasonSummary> topReasons;
+
+  factory BbnSummary.fromJson(Map<String, dynamic> json) {
+    if (json['success'] == false) {
+      return BbnSummary(
+        success: false,
+        error: json['error']?.toString() ?? 'BBN unavailable',
+      );
+    }
+    final layers = json['layers'];
+    final layerMap = layers is Map ? layers.cast<String, dynamic>() : null;
+    final layer4 = layerMap?['layer_4_collective'];
+    final layer2 = layerMap?['layer_2_themes'];
+    final layer1 = layerMap?['layer_1_reasons'];
+    final themes = ((layer2 is Map ? layer2['themes'] : null) as List?) ?? const [];
+    final reasons = ((layer1 is Map ? layer1['reasons'] : null) as List?) ?? const [];
+    final parsedReasons = reasons
+        .whereType<Map>()
+        .map((r) => BbnReasonSummary.fromJson(r.cast<String, dynamic>()))
+        .toList()
+      ..sort((a, b) => b.probability.compareTo(a.probability));
+    return BbnSummary(
+      success: true,
+      finalCscore: _toDouble(json['final_cscore']),
+      method: layer4 is Map ? layer4['method']?.toString() : null,
+      themes: themes
+          .whereType<Map>()
+          .map((t) => BbnThemeSummary.fromJson(t.cast<String, dynamic>()))
+          .where((t) => t.reasonCount > 0 && t.probability != null)
+          .toList(),
+      topReasons: parsedReasons.take(8).toList(),
+    );
+  }
+}
+
+class WikiPageMeta {
+  const WikiPageMeta({required this.title, this.updatedAt});
+
+  final String title;
+  final String? updatedAt;
+
+  factory WikiPageMeta.fromJson(Map<String, dynamic> json) => WikiPageMeta(
+        title: json['title'] as String? ?? 'Untitled',
+        updatedAt: json['updated_at'] as String?,
+      );
+}
+
+class WikiSummary {
+  const WikiSummary({
+    required this.pageCount,
+    this.lastIngestedAt,
+    this.pages = const {},
+  });
+
+  final int pageCount;
+  final String? lastIngestedAt;
+  final Map<String, WikiPageMeta> pages;
+
+  factory WikiSummary.fromJson(Map<String, dynamic> json) {
+    final rawPages = json['pages'];
+    final pages = <String, WikiPageMeta>{};
+    if (rawPages is Map) {
+      rawPages.forEach((key, value) {
+        if (value is Map) {
+          pages[key.toString()] =
+              WikiPageMeta.fromJson(value.cast<String, dynamic>());
+        }
+      });
+    }
+    return WikiSummary(
+      pageCount: _toInt(json['page_count']),
+      lastIngestedAt: json['last_ingested_at'] as String?,
+      pages: pages,
+    );
+  }
+}
+
+class WikiPageContent {
+  const WikiPageContent({required this.slug, required this.content});
+
+  final String slug;
+  final String content;
+
+  factory WikiPageContent.fromJson(Map<String, dynamic> json, String slug) =>
+      WikiPageContent(
+        slug: json['slug'] as String? ?? slug,
+        content: json['content'] as String? ?? '',
+      );
+}
+
+class WikiQueryResponse {
+  const WikiQueryResponse({required this.answer});
+
+  final String answer;
+
+  factory WikiQueryResponse.fromJson(Map<String, dynamic> json) =>
+      WikiQueryResponse(answer: json['answer'] as String? ?? '');
+}
