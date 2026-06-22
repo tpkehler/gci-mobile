@@ -34,7 +34,7 @@ class ParticipateScreen extends ConsumerWidget {
     final jams = ref.watch(participateJamsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Participate')),
+      appBar: AppBar(title: const Text('Contribute')),
       body: jams.when(
         loading: () => const LoadingView(message: 'Finding jams...'),
         error: (e, _) => ErrorView(

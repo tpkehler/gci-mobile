@@ -8,7 +8,7 @@ import 'explore_screen.dart';
 import 'my_wiki_screen.dart';
 import 'profile_screen.dart';
 
-/// Root tab shell: My Jams · Participate · Explore · My Wiki · Profile.
+/// Root tab shell: My Jams · Contribute · Explore · My Wiki · Profile.
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key});
 
@@ -22,7 +22,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   @override
   Widget build(BuildContext context) {
     final isGuest = ref.watch(authControllerProvider).isGuest;
-    // Guests have no dashboard data; start them on Participate.
+    // Guests have no dashboard data; start them on Contribute.
     final pages = [
       if (!isGuest) const DashboardScreen(),
       const ParticipateScreen(),
@@ -39,7 +39,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
       const NavigationDestination(
           icon: Icon(Icons.how_to_reg_outlined),
           selectedIcon: Icon(Icons.how_to_reg),
-          label: 'Participate'),
+          label: 'Contribute'),
       const NavigationDestination(
           icon: Icon(Icons.explore_outlined),
           selectedIcon: Icon(Icons.explore),
