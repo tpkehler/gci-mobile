@@ -8,6 +8,7 @@ import 'features/auth/forgot_password_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
 import 'features/create/create_jam_screen.dart';
+import 'features/demo/demo_web_screen.dart';
 import 'features/home/shell_screen.dart';
 import 'features/jam/idea_jam_screen.dart';
 import 'features/jam/jam_detail_screen.dart';
@@ -44,16 +45,20 @@ final routerProvider = Provider<GoRouter>((ref) {
           path == '/forgot-password';
       final isJamRoute =
           path.startsWith('/jam/') || path.startsWith('/collaborate/');
+      final isDemoRoute = path.startsWith('/demo/mhg');
 
-      // First-run intro: show it once, but never block invite deep links or
-      // the welcome screen itself.
-      if (!onboarding.seenIntro && !isJamRoute && path != '/welcome') {
+      // First-run intro: show it once, but never block invite deep links,
+      // demo story, or the welcome screen itself.
+      if (!onboarding.seenIntro &&
+          !isJamRoute &&
+          !isDemoRoute &&
+          path != '/welcome') {
         return '/welcome';
       }
 
       if (!auth.isSignedIn) {
-        // Jam deep links are reachable signed-out: send to login carrying the
-        // destination, where "Continue as guest" is offered.
+        // Demo + jam deep links reachable signed-out.
+        if (isDemoRoute) return null;
         if (isJamRoute) {
           return '/login?from=${Uri.encodeComponent(state.uri.toString())}';
         }
@@ -112,6 +117,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/facilitate/:id',
           builder: (_, state) =>
               ParticipateScreen(jamId: state.pathParameters['id']!)),
+      ...demoStoryRoutes(),
     ],
   );
 });
